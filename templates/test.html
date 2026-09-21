@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mental Health AI Assessment</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 11.11%;
+            background: #2563eb;
+            transition: width 0.3s ease;
+        }
+
+        .question-number {
+            color: #2563eb;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .question-title {
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: block;
+        }
+
+        .option:hover {
+            border-color: #2563eb;
+            background: #f8faff;
+        }
+
+        .option input {
+            margin-right: 10px;
+        }
+
+        .option.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .ok-button {
+            margin-top: 30px;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .ok-button:hover {
+            background: #1d4ed8;
+        }
+
+        .ok-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .result {
+            display: none;
+        }
+
+        .severity {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 25px 0 10px;
+        }
+
+        .confidence {
+            text-align: center;
+            font-size: 18px;
+            color: #4b5563;
+            margin-bottom: 30px;
+        }
+
+        .probability {
+            margin: 15px 0;
+        }
+
+        .probability-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .bar {
+            width: 100%;
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: #2563eb;
+            transition: width 0.5s ease;
+        }
+
+        .error {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 8px;
+        }
+
+        .restart-button {
+            margin-top: 30px;
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #2563eb;
+            border-radius: 10px;
+            background: white;
+            color: #2563eb;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .restart-button:hover {
+            background: #eff6ff;
+        }
+
+        .disclaimer {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                margin: 20px auto;
+                padding: 12px;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .question-title {
+                font-size: 19px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <!-- Assessment Card -->
+
+    <div class="card" id="assessmentCard">
+
+        <h1>Mental Health AI Assessment</h1>
+
+        <p class="subtitle">
+            Over the last 2 weeks, how often have you been bothered
+            by the following problems?
+        </p>
+
+
+        <!-- Progress -->
+
+        <div class="progress-container">
+
+            <div class="progress-text">
+                <span id="progressText">
+                    Question 1 of 9
+                </span>
+
+                <span id="progressPercentage">
+                    11%
+                </span>
+            </div>
+
+            <div class="progress">
+                <div
+                    class="progress-bar"
+                    id="progressBar">
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Current Question -->
+
+        <div id="questionContainer">
+
+            <div class="question-number"
+                 id="questionNumber">
+                Question 1
+            </div>
+
+            <div class="question-title"
+                 id="questionText">
+            </div>
+
+            <div class="options"
+                 id="optionsContainer">
+            </div>
+
+            <button
+                class="ok-button"
+                id="okButton"
+                disabled>
+                OK
+            </button>
+
+        </div>
+
+
+        <!-- Loading -->
+
+        <div class="loading"
+             id="loading">
+
+            <h2>Analyzing your responses...</h2>
+
+            <p>
+                Please wait while the AI model processes the assessment.
+            </p>
+
+        </div>
+
+
+        <!-- Error -->
+
+        <div class="error"
+             id="error">
+        </div>
+
+    </div>
+
+
+    <!-- Result Card -->
+
+    <div class="card result"
+         id="resultCard">
+
+        <h1>Assessment Result</h1>
+
+        <div class="severity"
+             id="severity">
+        </div>
+
+        <div class="confidence">
+            Model confidence:
+            <strong id="confidence"></strong>
+        </div>
+
+
+        <h3>Class Probabilities</h3>
+
+        <div id="probabilities">
+        </div>
+
+
+        <div class="disclaimer">
+
+            This result is an experimental model output based on the
+            assessment data. It is not a medical diagnosis and should
+            not be used as a substitute for evaluation by a qualified
+            healthcare professional.
+
+        </div>
+
+
+        <button
+            class="restart-button"
+            onclick="restartAssessment()">
+            Take Assessment Again
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // --------------------------------------------------
+    // PHQ-9 Questions
+    // --------------------------------------------------
+
+    const questions = [
+
+        {
+            id: 1,
+            text: "Little interest or pleasure in doing things?"
+        },
+
+        {
+            id: 2,
+            text: "Feeling down, depressed, or hopeless?"
+        },
+
+        {
+            id: 3,
+            text: "Trouble falling or staying asleep, or sleeping too much?"
+        },
+
+        {
+            id: 4,
+            text: "Feeling tired or having little energy?"
+        },
+
+        {
+            id: 5,
+            text: "Poor appetite or overeating?"
+        },
+
+        {
+            id: 6,
+            text: "Feeling bad about yourself — or that you are a failure or have let yourself or your family down?"
+        },
+
+        {
+            id: 7,
+            text: "Trouble concentrating on things, such as reading the newspaper or watching television?"
+        },
+
+        {
+            id: 8,
+            text: "Moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual?"
+        },
+
+        {
+            id: 9,
+            text: "Thoughts that you would be better off dead or of hurting yourself in some way?"
+        }
+
+    ];
+
+
+    // --------------------------------------------------
+    // Answer options
+    // --------------------------------------------------
+
+    const options = [
+
+        {
+            value: 0,
+            text: "Not at all"
+        },
+
+        {
+            value: 1,
+            text: "Several days"
+        },
+
+        {
+            value: 2,
+            text: "More than half the days"
+        },
+
+        {
+            value: 3,
+            text: "Nearly every day"
+        }
+
+    ];
+
+
+    // --------------------------------------------------
+    // Variables
+    // --------------------------------------------------
+
+    let currentQuestion = 0;
+
+    const answers = {};
+
+    const responseTimes = {};
+
+    let questionStartTime = null;
+
+
+    // --------------------------------------------------
+    // DOM elements
+    // --------------------------------------------------
+
+    const questionNumber =
+        document.getElementById("questionNumber");
+
+    const questionText =
+        document.getElementById("questionText");
+
+    const optionsContainer =
+        document.getElementById("optionsContainer");
+
+    const okButton =
+        document.getElementById("okButton");
+
+    const progressText =
+        document.getElementById("progressText");
+
+    const progressPercentage =
+        document.getElementById("progressPercentage");
+
+    const progressBar =
+        document.getElementById("progressBar");
+
+    const questionContainer =
+        document.getElementById("questionContainer");
+
+    const loading =
+        document.getElementById("loading");
+
+    const errorBox =
+        document.getElementById("error");
+
+    const assessmentCard =
+        document.getElementById("assessmentCard");
+
+    const resultCard =
+        document.getElementById("resultCard");
+
+
+    // --------------------------------------------------
+    // Load question
+    // --------------------------------------------------
+
+    function loadQuestion() {
+
+        const question =
+            questions[currentQuestion];
+
+
+        questionNumber.textContent =
+            `Question ${question.id}`;
+
+
+        questionText.textContent =
+            question.text;
+
+
+        progressText.textContent =
+            `Question ${question.id} of 9`;
+
+
+        const percentage =
+            Math.round(
+                ((currentQuestion + 1) / 9) * 100
+            );
+
+
+        progressPercentage.textContent =
+            `${percentage}%`;
+
+
+        progressBar.style.width =
+            `${percentage}%`;
+
+
+        // Clear previous options
+
+        optionsContainer.innerHTML = "";
+
+
+        // Create answer options
+
+        options.forEach(option => {
+
+            const label =
+                document.createElement("label");
+
+            label.className =
+                "option";
+
+
+            label.innerHTML = `
+                <input
+                    type="radio"
+                    name="currentAnswer"
+                    value="${option.value}">
+                ${option.text}
+            `;
+
+
+            const radio =
+                label.querySelector("input");
+
+
+            radio.addEventListener(
+                "change",
+                function() {
+
+                    // Highlight selected option
+
+                    document
+                        .querySelectorAll(".option")
+                        .forEach(item => {
+                            item.classList.remove(
+                                "selected"
+                            );
+                        });
+
+
+                    label.classList.add(
+                        "selected"
+                    );
+
+
+                    okButton.disabled =
+                        false;
+                }
+            );
+
+
+            optionsContainer.appendChild(
+                label
+            );
+
+        });
+
+
+        // Reset OK button
+
+        okButton.disabled = true;
+
+
+        // Start timing this question
+
+        questionStartTime =
+            performance.now();
+
+    }
+
+
+    // --------------------------------------------------
+    // OK button
+    // --------------------------------------------------
+
+    okButton.addEventListener(
+        "click",
+        async function() {
+
+            const selected =
+                document.querySelector(
+                    'input[name="currentAnswer"]:checked'
+                );
+
+
+            if (!selected) {
+                return;
+            }
+
+
+            // Store answer
+
+            const value =
+                Number(selected.value);
+
+
+            const questionId =
+                questions[currentQuestion].id;
+
+
+            answers[
+                `question${questionId}`
+            ] = value;
+
+
+            // --------------------------------------------------
+            // Calculate response time
+            // --------------------------------------------------
+
+            const elapsed =
+                (
+                    performance.now()
+                    - questionStartTime
+                ) / 1000;
+
+
+            responseTimes[
+                `time${questionId}`
+            ] = Number(
+                elapsed.toFixed(2)
+            );
+
+
+            // --------------------------------------------------
+            // Move to next question
+            // --------------------------------------------------
+
+            currentQuestion++;
+
+
+            if (currentQuestion < 9) {
+
+                loadQuestion();
+
+            } else {
+
+                await submitAssessment();
+
+            }
+
+        }
+    );
+
+
+    // --------------------------------------------------
+    // Submit assessment
+    // --------------------------------------------------
+
+    async function submitAssessment() {
+
+        questionContainer.style.display =
+            "none";
+
+        loading.style.display =
+            "block";
+
+
+        try {
+
+            // Build API request
+
+            const data = {
+
+                ...answers,
+
+                ...responseTimes
+
+            };
+
+
+            console.log(
+                "Sending data to API:",
+                data
+            );
+
+
+            // --------------------------------------------------
+            // Call existing Flask API
+            // --------------------------------------------------
+
+            const response =
+                await fetch(
+                    "/predict",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(data)
+                    }
+                );
+
+
+            const responseData =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    responseData.message ||
+                    "Prediction failed"
+                );
+
+            }
+
+
+            // --------------------------------------------------
+            // Display result
+            // --------------------------------------------------
+
+            displayResult(
+                responseData.data
+            );
+
+
+        } catch (error) {
+
+            loading.style.display =
+                "none";
+
+            questionContainer.style.display =
+                "block";
+
+            errorBox.textContent =
+                error.message;
+
+            errorBox.style.display =
+                "block";
+
+        }
+
+    }
+
+
+    // --------------------------------------------------
+    // Display model result
+    // --------------------------------------------------
+
+    function displayResult(prediction) {
+
+        assessmentCard.style.display =
+            "none";
+
+
+        resultCard.style.display =
+            "block";
+
+
+        document.getElementById(
+            "severity"
+        ).textContent =
+            prediction.predicted_severity;
+
+
+        document.getElementById(
+            "confidence"
+        ).textContent =
+            `${(
+                prediction.confidence * 100
+            ).toFixed(2)}%`;
+
+
+        const probabilityContainer =
+            document.getElementById(
+                "probabilities"
+            );
+
+
+        probabilityContainer.innerHTML =
+            "";
+
+
+        Object.entries(
+            prediction.probabilities
+        ).forEach(
+            ([label, probability]) => {
+
+                const percentage =
+                    probability * 100;
+
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                div.className =
+                    "probability";
+
+
+                div.innerHTML = `
+
+                    <div class="probability-label">
+
+                        <span>
+                            ${label}
+                        </span>
+
+                        <span>
+                            ${percentage.toFixed(2)}%
+                        </span>
+
+                    </div>
+
+                    <div class="bar">
+
+                        <div
+                            class="bar-fill"
+                            style="
+                                width: ${percentage}%;
+                            ">
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                probabilityContainer.appendChild(
+                    div
+                );
+
+            }
+        );
+
+    }
+
+
+    // --------------------------------------------------
+    // Restart assessment
+    // --------------------------------------------------
+
+    function restartAssessment() {
+
+        currentQuestion = 0;
+
+
+        Object.keys(answers)
+            .forEach(
+                key => delete answers[key]
+            );
+
+
+        Object.keys(responseTimes)
+            .forEach(
+                key => delete responseTimes[key]
+            );
+
+
+        resultCard.style.display =
+            "none";
+
+
+        assessmentCard.style.display =
+            "block";
+
+
+        errorBox.style.display =
+            "none";
+
+
+        questionContainer.style.display =
+            "block";
+
+
+        loading.style.display =
+            "none";
+
+
+        loadQuestion();
+
+    }
+
+
+    // --------------------------------------------------
+    // Start assessment
+    // --------------------------------------------------
+
+    loadQuestion();
+
+</script>
+
+</body>
+
+</html>
